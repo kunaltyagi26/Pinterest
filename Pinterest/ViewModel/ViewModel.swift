@@ -17,7 +17,7 @@ class ViewModel {
     private let client: APIClient
     private var photos: Photos = [] {
         didSet {
-            fetchPhotos()
+            fetchPhoto()
         }
     }
     var cellViewModels: [CellViewModel] = []
@@ -37,8 +37,9 @@ class ViewModel {
     }
     
     func fetchPhotos() {
-        if let client = client as? UnsplashClient, let endpoint = UnsplashEndpoint.photos(id: UnsplashClient.APIKey, order: .popular) as? UnsplashEndpoint {
+        if let client = client as? UnsplashClient {
             self.isLoading = true
+            let endpoint = UnsplashEndpoint.photos(id: UnsplashClient.APIKey, order: .latest)
             client.fetch(with: endpoint) { (either) in
                 switch either {
                 case .success(let photos):
@@ -53,9 +54,9 @@ class ViewModel {
     private func fetchPhoto() {
         let group = DispatchGroup()
         self.photos.forEach { (photo) in
-            DispatchQueue.global().async(group: group) {
+            DispatchQueue.global(qos: .background).async(group: group) {
                 group.enter()
-                guard let imageData =  try? Data(contentsOf: photo.url.thumb) else {
+                guard let imageData = try? Data(contentsOf: photo.url.small) else {
                     self.showError?(APIError.imageDownload)
                     return
                 }

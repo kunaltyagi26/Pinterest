@@ -35,7 +35,7 @@ enum UnsplashEndpoint: Endpoint {
     case photos(id: String, order: Order)
     
     var baseUrl: String {
-        return "https://api.unsplash.com/"
+        return UnsplashClient.baseUrl
     }
     
     var path: String {
